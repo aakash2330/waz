@@ -1,5 +1,6 @@
-from pydantic.main import BaseModel
 from enum import Enum
+
+from pydantic.main import BaseModel
 
 
 class TRole(str, Enum):
@@ -10,13 +11,9 @@ class TRole(str, Enum):
 class TSignup(BaseModel):
     username: str
     password: str
+    type: TRole
 
 
 class TSignin(BaseModel):
     username: str
     password: str
-
-
-class TCreateAvatar(BaseModel):
-    imageUrl: str
-    name: str

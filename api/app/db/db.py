@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
-from sqlmodel import  SQLModel, create_engine
+from sqlmodel import SQLModel, create_engine
 
 engine = create_engine(
     "postgresql://username:password@localhost:5432/database", echo=True

@@ -1,12 +1,13 @@
-from sqlmodel import Session
-from db.db import engine
-from models.users import User
-from validator_schema.users import TSignin, TSignup, TRole
-from sqlmodel import select
+import logging
+from typing import Any
+
 import bcrypt
 import jwt
-from typing import Any
-import logging
+from sqlmodel import Session, select
+
+from db.db import engine
+from db.schema import User
+from validator_schema.users import TSignin, TSignup
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -25,7 +26,7 @@ def add_user_to_db(data: TSignup) -> tuple[int, dict[str, str] | None]:
         user = User(
             username=data.username,
             password=hashedPassword,
-            type=TRole.user,
+            type=data.type,
             avatarId=None,
         )
 
@@ -58,7 +59,7 @@ def generate_jwt_token(data: User):
     return str(token)
 
 
-def user_sign_in(data: TSignin) -> tuple[int, str | None]:
+def user_sign_in(data: TSignin) -> tuple[int, dict[str, str] | None]:
     logging.info(
         f"getting user data for username -  {data.username} and comparing password"
     )
@@ -67,4 +68,4 @@ def user_sign_in(data: TSignin) -> tuple[int, str | None]:
     logging.info("generating token for the user")
 
     token = generate_jwt_token(user)
-    return 200, token
+    return 200, {"token": token}
