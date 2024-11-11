@@ -17,15 +17,6 @@ app.include_router(users.router, prefix="/user", tags=["user"])
 app.include_router(admin.router, prefix="/admin", tags=["admin"])
 
 
-# @app.middleware("http")
-# async def add_process_time_header(request: Request, call_next):
-#    logging.info("Running middleware")
-#    auth_header = dict(request.scope["headers"]).get(b"authorization")
-#    logging.info(f"auth_header {auth_header}")
-#    response = await call_next(request)
-#    return response
-
-
 @app.get("/")
 async def root():
     return {"goodbye": "world"}
@@ -38,7 +29,7 @@ async def signup(body: TSignup):
         return JSONResponse(content=data, status_code=status)
     except Exception as error:
         logging.error(error)
-        return JSONResponse(content=error, status_code=400)
+        return JSONResponse(content=str(error.args[0]), status_code=400)
 
 
 @app.post("/signin")
@@ -48,4 +39,4 @@ async def signin(body: TSignin):
         return JSONResponse(content=data, status_code=status)
     except Exception as error:
         logging.error(error)
-        return JSONResponse(content=error, status_code=403)
+        return JSONResponse(content=str(error.args[0]), status_code=400)

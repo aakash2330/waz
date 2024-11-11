@@ -17,3 +17,12 @@ class TSignup(BaseModel):
 class TSignin(BaseModel):
     username: str
     password: str
+
+
+class TGetUserMetadata(BaseModel):
+    ids: list[str]
+
+
+class TUserMetadata(BaseModel):
+    userId: str
+    avatarUrl: str | None = None

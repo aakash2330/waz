@@ -6,7 +6,7 @@ class TCreateElement(BaseModel):
     height: int
     width: int
     static: bool
-    name:str
+    name: str
 
 
 class TUpdateElement(BaseModel):
@@ -16,3 +16,7 @@ class TUpdateElement(BaseModel):
 
 class TUpdateElementBody(BaseModel):
     imageUrl: str
+
+
+class TDeleteElement(BaseModel):
+    id: str

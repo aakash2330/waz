@@ -1,13 +1,17 @@
 import logging
 from typing import Any
 
+from fastapi.encoders import jsonable_encoder
+
+from validator_schema.avatar import TUpdateMetadata
+
 import bcrypt
 import jwt
 from sqlmodel import Session, select
 
 from db.db import engine
-from db.schema import User
-from validator_schema.users import TSignin, TSignup
+from db.schema import Avatar, User
+from validator_schema.users import TGetUserMetadata, TSignin, TSignup, TUserMetadata
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -54,7 +58,7 @@ def find_user_by_id(data: TSignin):
 
 
 def generate_jwt_token(data: User):
-    payload: dict[str, Any] = data.model_dump(exclude={"password", "id"})
+    payload: dict[str, Any] = data.model_dump(exclude={"password"})
     token = jwt.encode(payload, "secret", algorithm="HS256")
     return str(token)
 
@@ -69,3 +73,54 @@ def user_sign_in(data: TSignin) -> tuple[int, dict[str, str] | None]:
 
     token = generate_jwt_token(user)
     return 200, {"token": token}
+
+
+def get_bulk_user_metadata(
+    body: TGetUserMetadata,
+) -> tuple[int, dict[str, list[TUserMetadata]] | None]:
+    logging.info(f"getting meta data for users with id's {body.ids}")
+    with Session(engine) as session:
+        query = select(User).where(
+            User.id.in_(body.ids)  # pyright: ignore[reportAttributeAccessIssue]
+        )
+        users = session.exec(query).unique().all()
+        if not users:
+            raise ValueError("Couldnt find users with the given ids")
+
+        logging.info("converting found users to desired shape")
+        usersList: list[TUserMetadata] = []
+        for user in users:
+            usersList.append(
+                TUserMetadata(
+                    userId=str(user.id),
+                    avatarUrl=(
+                        user.avatar.imageUrl
+                        if hasattr(user, "avatar") and user.avatar
+                        else None
+                    ),
+                )
+            )
+
+    return (200, {"usersAvatarMetadat": jsonable_encoder(usersList)})
+
+
+def update_user_metadata(
+    body: TUpdateMetadata, user: User
+) -> tuple[int, dict[str, Any] | None]:
+    logging.info(f"updating user {user.id} metadata to avatarId {body.avatarId}")
+    with Session(engine) as session:
+        query = select(Avatar).where(Avatar.id == body.avatarId)
+        avatar = session.exec(query).first()
+        if avatar:
+            logging.info(f"avatar with id {body.avatarId} found")
+            query = select(User).where(User.id == user.id)
+            foundUser = session.exec(query).first()
+            if foundUser:
+                foundUser.avatarId = avatar.id
+                session.add(foundUser)
+                session.commit()
+            else:
+                raise ValueError(f"User with user id {user.id} not found")
+            return 200, jsonable_encoder(f"added avatar {avatar.id} to user {user.id}")
+        else:
+            raise ValueError(f"no avatar found for the id {body.avatarId}")

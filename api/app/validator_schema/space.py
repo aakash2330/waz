@@ -9,17 +9,17 @@ class TCreateSpace(BaseModel):
     spaceId: str | None = None
 
     @model_validator(mode="before")
-    def check_name_and_dimentions(cls, values: dict[str, str]) -> dict[str, str]:
+    def check_name_and_dimensions(cls, values: dict[str, str]) -> dict[str, str]:
         space_id = values.get("spaceId")
         width = values.get("width")
         height = values.get("height")
 
         if space_id is None:
             if not width or not height:
-                raise ValueError("Space id is null , dimentions must be provided")
+                raise ValueError("Space id is null , dimensions must be provided")
         else:
             if height or width:
-                raise ValueError("Both Space Id and dimentions can't be present")
+                raise ValueError("Both Space Id and dimensions can't be present")
 
         return values
 
@@ -30,3 +30,5 @@ class TAddElementToSpace(BaseModel):
     spaceId: str
     x: int
     y: int
+
+

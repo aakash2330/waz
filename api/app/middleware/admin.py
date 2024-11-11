@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 def admin_middleware(request: Request):
     try:
-        print(f"Running admin_middleware for path: {request.url.path}")
+        logging.info(f"Running admin_middleware for path: {request.url.path}")
         auth_header = dict(request.scope["headers"]).get(b"authorization")
         if auth_header is None:
             raise ValueError("Couldn't find Auth Header")
@@ -25,7 +25,7 @@ def admin_middleware(request: Request):
         if payload.get("type") == TRole.admin:
             logging.info(f"user has the role {payload.get("type")}")
             with Session(engine) as session:
-                query = select(User).where(User.username == payload.get("username"))
+                query = select(User).where(User.id == payload.get("userId"))
                 user = session.exec(query).first()
                 request.state.user = user
             return request
