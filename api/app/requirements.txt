@@ -6,3 +6,4 @@ bcrypt==4.2.0
 PyJWT==2.9.0
 types-PyJWT==1.7.1
 jsonpickle==3.4.2
+redis==5.2.0

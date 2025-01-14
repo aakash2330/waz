@@ -8,6 +8,7 @@ from middleware.user import user_middleware
 from service.avatar import get_all_avatars
 from service.space import (
     add_element_to_space,
+    check_space_id_exists,
     create_space,
     delete_space_element,
     get_all_elements,
@@ -17,7 +18,7 @@ from service.space import (
 from service.users import get_bulk_user_metadata, update_user_metadata
 from validator_schema.avatar import TUpdateMetadata
 from validator_schema.element import TDeleteElement
-from validator_schema.space import TAddElementToSpace, TCreateSpace
+from validator_schema.space import TAddElementToSpace, TCheckSpaceId, TCreateSpace
 from validator_schema.users import TGetUserMetadata
 
 logging.basicConfig(level=logging.DEBUG)
@@ -120,6 +121,18 @@ async def delete_space_element_route(body: TDeleteElement, request: Request):
         user = request.get("state", {}).get("user", {})
         status, data = delete_space_element(body, user)
         return JSONResponse(content=data, status_code=status)
+    except Exception as error:
+        logging.error(error)
+        return JSONResponse(content=str(error.args[0]), status_code=400)
+
+
+@router.get("/space/check/{spaceId}")
+async def check_space_id_exists_route(
+    spaceId: Annotated[str, Path(title="elementId")], request: Request
+):
+    try:
+        status, data = check_space_id_exists(TCheckSpaceId(spaceId=spaceId))
+        return JSONResponse(content={"space_exists": data}, status_code=status)
     except Exception as error:
         logging.error(error)
         return JSONResponse(content=str(error.args[0]), status_code=400)

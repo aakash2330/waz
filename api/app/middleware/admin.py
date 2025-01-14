@@ -25,9 +25,13 @@ def admin_middleware(request: Request):
         if payload.get("type") == TRole.admin:
             logging.info(f"user has the role {payload.get("type")}")
             with Session(engine) as session:
-                query = select(User).where(User.id == payload.get("userId"))
+                query = select(User).where(User.id == payload.get("id"))
                 user = session.exec(query).first()
-                request.state.user = user
+                if user:
+                    request.state.user = user
+                    return request
+                else:
+                    raise ValueError("Unable to find user")
             return request
 
         raise ValueError("Doesn't have correct role 'user'")

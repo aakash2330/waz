@@ -31,4 +31,5 @@ class TAddElementToSpace(BaseModel):
     x: int
     y: int
 
-
+class TCheckSpaceId(BaseModel):
+    spaceId:str

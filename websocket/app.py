@@ -1,7 +1,7 @@
 import logging
 
 from fastapi import FastAPI, WebSocket
-from managers.user import UserManager
+from managers.user_manager import UserManager
 
 logging.basicConfig(level=logging.DEBUG)
 

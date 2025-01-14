@@ -3,15 +3,26 @@ from typing import Any, Sequence
 from fastapi.encoders import jsonable_encoder
 from db.db import engine
 from sqlmodel import Session, select
-from db.schema import Avatar, Element, Space, SpaceElement, User
-from validator_schema.avatar import TUpdateMetadata
+from db.schema import Element, Space, SpaceElement, User
 from validator_schema.element import TDeleteElement
 from validator_schema.space import (
     TAddElementToSpace,
+    TCheckSpaceId,
     TCreateSpace,
 )
 
 logging.basicConfig(level=logging.DEBUG)
+
+
+def check_space_id_exists(data: TCheckSpaceId):
+    with Session(engine) as session:
+        query = select(Space).where(Space.id == data.spaceId)
+        space = session.exec(query).first()
+        if not space:
+            logging.error(f"couldn't find space with space Id {data.spaceId}")
+            return 200, False
+        logging.info(f"space found with space Id {data.spaceId}")
+        return 200, True
 
 
 def create_space(data: TCreateSpace, user: User) -> tuple[int, dict[str, str] | None]:

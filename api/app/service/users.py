@@ -59,7 +59,7 @@ def find_user_by_id(data: TSignin):
 
 def generate_jwt_token(data: User):
     payload: dict[str, Any] = data.model_dump(exclude={"password"})
-    token = jwt.encode(payload, "secret", algorithm="HS256")
+    token = jwt.encode(jsonable_encoder(payload), "secret", algorithm="HS256")
     return str(token)
 
 
